@@ -148,15 +148,6 @@ for($y=0;$y<count($ini_array['pis']['pi_name']);$y++){
 	}
 }
 
-#echo '<b>Old images:</b><br>';												
-#$dirname = 'old/';															# set archive folder name variable
-#$images = glob($dirname."*.bmp");											# lookup all .bmp files in archive folder
-#if($images){
-#	for($x=0;$x<count($images);$x++){												# loop through all .bmp files in archive folder
-#		echo $images[$x].':';
-#		echo '<a href="'.$images[$x].'"><img src="'.$images[$x].'"style="vertical-align:middle"></a><br/><br/>'; # add image to page with link
-#	}
-#}
 ?>
 </body>
 </html>
