@@ -15,7 +15,7 @@
 date_default_timezone_set('PST8PDT');										# Set Pacific Timezone
 
 $csva = array('Device_1.csv','Device_2.csv');								# CSV filenames
-$imagea = array('Device_1.bmp','Device_2.bmp');
+$imagea = array('Device_1.bmp','Device_2.bmp');								# BMP filenames
 
 if(isset($_GET['Trigger'])) {												# was Trigger passed to url?
 	trigger();																# run trigger function
@@ -148,6 +148,29 @@ for($y=0;$y<count($ini_array['pis']['pi_name']);$y++){
 	}
 }
 
+$hostname = "127.0.0.1";
+$username = "webuser";
+$password = "webuser123";
+$database = "tipi";
+
+$conn = new mysqli($hostname, $username, $password,  $database);
+
+if(!$conn->connect_error){
+	die("Connection to database failed! ".$conn->connect_error);
+}
+$sql = "select i.image, t.tempdata from image i, temperature t, imagetemprel itr where i.id = itr.imageid and t.id = itr.tempid";
+
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+        echo "id: " . $row["id"]. " - Name: " . $row["id"]. " " . $row["image"]. "<br>";
+    }
+} else {
+    echo "0 results";
+}
+$conn->close();
 ?>
 </body>
 </html>
