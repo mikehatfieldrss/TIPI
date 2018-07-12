@@ -47,7 +47,6 @@ function getlastimageid(){
 	
 	## Generate next IDs for insert
 	if ($lastimageid_result->num_rows > 0) {
-		// output data of each row
 		while($row = $lastimageid_result->fetch_assoc()) {
 			$lastimageid = ltrim($row["max_imageid"],"IMG");
 			$newimageid = $lastimageid++;
@@ -194,9 +193,7 @@ function inserttempdata($csvp){
 
 function insertrelation($imageid,$newtempid){
 	global $username, $password, $hostname, $database;
-	
-	echo "<br/> IMAGEID:".$imageid."<BR/>TEMPID:".$newtempid."<br/>";
-	
+
 	$conn = new mysqli($hostname, $username, $password, $database);
 	
 	if($conn->connect_error){
@@ -213,7 +210,7 @@ function insertrelation($imageid,$newtempid){
 function trigger() {
 	global $TESTMODE;
 	if (!$TESTMODE){
-	$ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
+	$ini_array = parse_ini_file("tipi.ini",true); 							# array to store the ini file contents
 	$path = './phpseclib1.0.11/';						 					# path for phpseclib files
 	set_include_path(get_include_path() . PATH_SEPARATOR . $path); 			# modify include path
 	include "Net/SSH2.php"; 												# include ssh library
@@ -254,15 +251,15 @@ function archive() {
 }
 
 function download() {
-	$ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
+	$ini_array = parse_ini_file("tipi.ini",true); 							# array to store the ini file contents
 	$path = './phpseclib1.0.11/';						 					# path for phpseclib files
 
 	global $TESTMODE,$newrelid,$newimageid,$newtempid;
-	
+	echo "<hr/>";
 	echo "<br/>newrelid: ".getnewrelid()."<br/>";
 	echo "<br/>newimageid: ".getlastimageid()."<br/>";
 	echo "<br/>newtempid: ".getnewtempid()."<br/>";
-			
+	echo "<hr/>";
 	set_include_path(get_include_path() . PATH_SEPARATOR . $path); 			# modify include path
 	include "Net/SFTP.php"; 												# include sftp library
 
@@ -284,7 +281,7 @@ function download() {
 
 			$date = new Datetime();							# date variable for file name 
 
-			echo "<b>Downloading from: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
+			echo "<b>Image Acquired: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
 		
 			$sftp = new Net_SFTP($host); 											# create sftp object for host
 			
@@ -323,42 +320,41 @@ if(isset($_GET['Download'])) {												# was Download passed to url?
 }
 
 ## display past images
-$ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
+$ini_array = parse_ini_file("tipi.ini",true); 								# array to store the ini file contents
+
+global $username, $password, $hostname, $database;
 
 echo '<b>Most recent images:</b><br>';												
 $images = glob($imgfolder."*.bmp");											# lookup all .bmp files in archive folder
 #echo "<br/>".count($images)."<br/>";
 $z = 0;
-for($y=0;$y<count($ini_array['pis']['pi_name']);$y++){
-	$name = $ini_array['pis']['pi_name'][$y];
+foreach($images as $image) {
+	echo " Name: ".$image.':';
+	echo '<a href="'.$image.'"><img src="'.$image.'"style="vertical-align:middle" width="320" height="320" ></a><br/><br/>'; # add image to page with link
 
-	for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){
-	
-		echo " Name: ".$images[($z)].':';
-		echo '<a href="'.$images[$z].'"><img src="'.$images[$z].'"style="vertical-align:middle" width="320" height="320" ></a><br/><br/>'; # add image to page with link
+	$conn = new mysqli($hostname, $username, $password, $database);
 
-			$csvs = glob($name.'-'.$csva[($x)]);
-			foreach($csvs as $csv) {
-			#$name = $ini_array['pis']['pi_name'][$x];
-			if($handle = fopen($name.'-'.$csva[($x)],"r")){						# open csv 
-				if($csvdata = fgetcsv($handle,",")){							# get csv data
-					if($csvdata[count($csvdata)-1]==0){							# check for 0 at end of data array
-						array_pop($csvdata);									# drop element if 0
-					}
-				}	
-				Else {
-					exit("Failed to get contents of ".$name.'-'.$csva[($x)]);
-				}
-			} 
-			Else {
-				exit("Failed to open ".$name.'-'.$csva[($x)]);
-			}
-				echo "Temperature range: ";
-				echo "min: ".min($csvdata);
-				echo " - max: ".max($csvdata)."<br/><br/>";
-			}
-		$z++;
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
 	}
+
+	$sql_gettempdata = "select tempdata from temperature t join imagetemprel i on i.tempid = t.id where i.imageid in (select id from image where image = '".$image."')";
+
+	$gettempdata_result = $conn->query($sql_gettempdata);
+
+	if ($gettempdata_result->num_rows > 0){
+		while($row = $gettempdata_result->fetch_assoc()){
+			echo "<br/>tempdata: ".$row["tempdata"]."<br/>";
+			echo "min temp: ".min($row["tempdata"])."<br/>";
+			echo "max temp: ".max($row["tempdata"])."<br/>";
+		}
+	} Else {
+		echo "0 results";
+	}
+
+	$conn->close();
+
+	$z++;
 }
 #############################################################################
 ?>
