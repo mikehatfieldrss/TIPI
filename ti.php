@@ -1,17 +1,38 @@
 <html>
-<body>
+<head>
 <style>body { 
     background-color: lightblue;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 75%;
 	<!--padding: 40px 19px; -->
+}
+	.container {
+		position: absolute;
+	}
+	.bottomleft {
+	color: white;
+    position: relative;
+    bottom: 24px;
+    left: 1px;
+    font-size: 18px;
+}
+	.bottomright {
+    position: relative;
+    bottom: 44px;
+    left: 300px;
+    font-size: 18px;
+}
+	img { 
+    width: 320px;
+    height: 320px;
+}		
 }</style>
-<a href="ti.php">HOME</a><br><br>
+</head>
+<body>
+<a href="ti.php">HOME</a> - <a href='archive.php'>Archive</a><br><br>
 <form action="ti.php" method="get">
-	<input type="submit" name="Trigger" value="Trigger">
+	<input type="submit" name="Capture" value="Capture">
 	<input type="submit" name="Download" value="Download">
-	<input type="submit" name="Insert" value="Insert">
-	<input type="submit" name="Read" value="Read">
 	<input type="submit" name="Search" value="Search">
 </form>
 <?php
@@ -228,7 +249,7 @@ function insertrelation($imageid,$newtempid){
 	return $insertrelation_result;
 }
 
-function trigger() {
+function capture() {
 	global $TESTMODE;
 	if (!$TESTMODE){
 	$ini_array = parse_ini_file("tipi.ini",true); 							# array to store the ini file contents
@@ -331,50 +352,11 @@ function download() {
 #############################################################################
 
 #BODY########################################################################
-if(isset($_GET['Trigger'])) {												# was Trigger passed to url?
-	trigger();																# run trigger function
+if(isset($_GET['Capture'])) {												# was Trigger passed to url?
+	capture();																# run trigger function
 }
 if(isset($_GET['Download'])) {												# was Download passed to url?
 	download();																# run download function
-}
-
-## display past images
-$ini_array = parse_ini_file("tipi.ini",true); 								# array to store the ini file contents
-
-global $username, $password, $hostname, $database;
-
-echo '<b>Most recent images:</b><br>';												
-$images = glob($imgfolder."*.bmp");											# lookup all .bmp files in archive folder
-#echo "<br/>".count($images)."<br/>";
-$z = 0;
-foreach($images as $image) {
-	echo " Name: ".$image.':';
-	echo '<a href="'.$image.'"><img src="'.$image.'"style="vertical-align:middle" width="320" height="320" ></a><br/><br/>'; # add image to page with link
-
-	$conn = new mysqli($hostname, $username, $password, $database);
-
-	if($conn->connect_error){
-		die("Connection to database failed! ".$conn->connect_error);
-	}
-
-	$sql_gettempdata = "select tempdata from temperature t join imagetemprel i on i.tempid = t.id where i.imageid in (select id from image where image = '".$image."')";
-
-	$gettempdata_result = $conn->query($sql_gettempdata);
-
-	if ($gettempdata_result->num_rows > 0){
-		while($row = $gettempdata_result->fetch_assoc()){
-			$temp = explode(",", $row["tempdata"]);
-			echo "<br/>tempdata: ".$row["tempdata"]."<br/>";
-			echo "min temp: ".min($temp)."<br/>";
-			echo "max temp: ".max($temp)."<br/>";
-		}
-	} Else {
-		echo "<br/><B>TEMPERATURE DATA NO FOUND</B><br/>";
-	}
-
-	$conn->close();
-
-	$z++;
 }
 #############################################################################
 ?>
