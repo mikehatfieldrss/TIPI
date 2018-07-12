@@ -363,9 +363,10 @@ foreach($images as $image) {
 
 	if ($gettempdata_result->num_rows > 0){
 		while($row = $gettempdata_result->fetch_assoc()){
+			$temp = explode(",", $row["tempdata"]);
 			echo "<br/>tempdata: ".$row["tempdata"]."<br/>";
-			echo "min temp: ".min($row["tempdata"])."<br/>";
-			echo "max temp: ".max($row["tempdata"])."<br/>";
+			echo "min temp: ".min($temp)."<br/>";
+			echo "max temp: ".max($temp)."<br/>";
 		}
 	} Else {
 		echo "<br/><B>TEMPERATURE DATA NO FOUND</B><br/>";
