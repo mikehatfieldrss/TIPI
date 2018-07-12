@@ -10,6 +10,9 @@
 <form action="ti.php" method="get">
 	<input type="submit" name="Trigger" value="Trigger">
 	<input type="submit" name="Download" value="Download">
+	<input type="submit" name="Insert" value="Insert">
+	<input type="submit" name="Read" value="Read">
+	<input type="submit" name="Search" value="Search">
 </form>
 <?php
 date_default_timezone_set('PST8PDT');										# Set Pacific Timezone
@@ -18,6 +21,11 @@ $csva = array('Device_1.csv','Device_2.csv');								# CSV filenames
 $imagea = array('Device_1.bmp','Device_2.bmp');								# BMP filenames
 
 $TESTMODE = true;
+
+$hostname = "127.0.0.1";
+$username = "webuser";
+$password = "webuser123";
+$database = "tipi";
 
 if(isset($_GET['Trigger'])) {												# was Trigger passed to url?
 	trigger();																# run trigger function
@@ -117,6 +125,35 @@ function download() {
 			
 		}		
 	}
+	global $username, $password, $hostname, $database;
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+}
+
+function insert(){
+	global $username, $password, $hostname, $database;
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	$sql = "insert into ";
+
+	$result = $conn->query($sql);
+
+	if ($result->num_rows > 0) {
+		// output data of each row
+		while($row = $result->fetch_assoc()) {
+			echo "image: ".$row["image"]." - Name: ".$row["tempdata"]."<br>";
+		}
+	} else {
+		echo "0 results";
+	}
+	$conn->close();
+	
 }
 
 $ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
@@ -157,29 +194,61 @@ for($y=0;$y<count($ini_array['pis']['pi_name']);$y++){
 	}
 }
 
-$hostname = "127.0.0.1";
-$username = "webuser";
-$password = "webuser123";
-$database = "tipi";
-
 $conn = new mysqli($hostname, $username, $password,  $database);
 
-if(!$conn->connect_error){
+if($conn->connect_error){
 	die("Connection to database failed! ".$conn->connect_error);
 }
-$sql = "select i.image, t.tempdata from image i, temperature t, imagetemprel itr where i.id = itr.imageid and t.id = itr.tempid";
 
-$result = $conn->query($sql);
+## Generate next IDs for insert
+$sql_lasttempid = "select max(id) as max_tempid from temperature";
+$sql_lastimageid = "select max(id) as max_imageid from image";
+$sql_lastrelid = "select max(id) as max_relid from imagetemprel";
 
-if ($result->num_rows > 0) {
+$lasttempid_result = $conn->query($sql_lasttempid);
+$lastimageid_result = $conn->query($sql_lastimageid);
+$lastrelid_result = $conn->query($sql_lastrelid);
+
+if ($lasttempid_result->num_rows > 0) {
     // output data of each row
-    while($row = $result->fetch_assoc()) {
-        echo "id: " . $row["id"]. " - Name: " . $row["id"]. " " . $row["image"]. "<br>";
+    while($row = $lasttempid_result->fetch_assoc()) {
+		$lasttempid = ltrim($row["max_tempid"],"TEMP");
+		$newtempid = $lasttempid++;
+		$newtempid = "TEMP".str_pad($lasttempid,5,"0",STR_PAD_LEFT);
+		echo "<br/>newtempid: ".$newtempid."<br/>";
+    }
+} else {
+    echo "0 results";
+}
+
+if ($lastimageid_result->num_rows > 0) {
+    // output data of each row
+    while($row = $lastimageid_result->fetch_assoc()) {
+		$lastimageid = ltrim($row["max_imageid"],"IMG");
+		$newimageid = $lastimageid++;
+		$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);
+		echo "<br/>newimageid: ".$newimageid."<br/>";
+   }
+} else {
+    echo "0 results";
+}
+
+if ($lastrelid_result->num_rows > 0) {
+    // output data of each row
+	while($row = $lastrelid_result->fetch_assoc()) {    	
+		$lastrelid = ltrim($row["max_relid"],"ITR");
+		$newrelid = $lastrelid++;
+		$newrelid = "ITR".str_pad($lastrelid,5,"0",STR_PAD_LEFT);
+		echo "<br/>newrelid: ".$newrelid."<br/>";
     }
 } else {
     echo "0 results";
 }
 $conn->close();
+##
+
+
+
 ?>
 </body>
 </html>
