@@ -169,10 +169,12 @@ function inserttempdata($csvp){
 	}
 	
 	if($handle = fopen($csvp,"r")){						# open csv 
-		if($csvdata = fgetcsv($handle,",")){							# get csv data
-			if($csvdata[count($csvdata)-1]==0){							# check for 0 at end of data array
-				array_pop($csvdata);									# drop element if 0
-			}
+		if($tempdata = file_get_contents($csvp)){
+			$tempid = getnewtempid();
+				
+			$sql_inserttempdata = "insert into temperature (id,tempdata,createddatetime) values ('".$tempid."','".$tempdata."',Now())";
+			
+			$inserttempdata_result = $conn->query($sql_inserttempdata);
 		}	
 		Else {
 			exit("Failed to get contents of ".$csvp);
@@ -182,13 +184,32 @@ function inserttempdata($csvp){
 		exit("Failed to open ".$csvp);
 	}
 	
-	$tempid = getnewtempid();
-	$sql_inserttempdata = "insert into temperature (id,tempdata,createddatetime) values ('".$tempid."','".implode($csvdata)."',Now())";
-	
-	$inserttempdata_result = $conn->query($sql_inserttempdata);
-	
 	return $tempid;
 	
+}
+
+function gettempdatafromfile($imagefile){
+	global $username, $password, $hostname, $database;	
+	
+	$conn = new mysqli($hostname, $username, $password,  $database);
+	
+	echo "<br/>imagefile: ".$imagefile."<br/>";
+	
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	
+	if($handle = fopen($imagefile,"r")){						# open csv 
+		if($filedata = file_get_contents($imagefile)){
+			echo "<br/>TEMPDATA: ".$filedata;
+		}	
+		Else {
+			exit("Failed to get contents of ".$imagefile);
+		}
+	} 
+	Else {
+		exit("Failed to open ".$imagefile);
+	}
 }
 
 function insertrelation($imageid,$newtempid){
@@ -306,8 +327,6 @@ function download() {
 		
 			
 }		
-	
-
 
 #############################################################################
 
@@ -349,7 +368,7 @@ foreach($images as $image) {
 			echo "max temp: ".max($row["tempdata"])."<br/>";
 		}
 	} Else {
-		echo "0 results";
+		echo "<br/><B>TEMPERATURE DATA NO FOUND</B><br/>";
 	}
 
 	$conn->close();
