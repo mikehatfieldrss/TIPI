@@ -15,23 +15,199 @@
 	<input type="submit" name="Search" value="Search">
 </form>
 <?php
+#GLOBALS#####################################################################
 date_default_timezone_set('PST8PDT');										# Set Pacific Timezone
 
 $csva = array('Device_1.csv','Device_2.csv');								# CSV filenames
 $imagea = array('Device_1.bmp','Device_2.bmp');								# BMP filenames
 
-$TESTMODE = true;
+$TESTMODE = false;
 
 $hostname = "127.0.0.1";
 $username = "webuser";
 $password = "webuser123";
 $database = "tipi";
 
-if(isset($_GET['Trigger'])) {												# was Trigger passed to url?
-	trigger();																# run trigger function
+$imgfolder = "images/";
+#############################################################################
+
+#FUNCTIONS###################################################################
+function getlastimageid(){
+	global $username, $password, $hostname, $database, $imgfolder;
+	
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	
+	$sql_lastimageid = "select max(id) as max_imageid from image";
+	
+	$lastimageid_result = $conn->query($sql_lastimageid);
+	
+	## Generate next IDs for insert
+	if ($lastimageid_result->num_rows > 0) {
+		// output data of each row
+		while($row = $lastimageid_result->fetch_assoc()) {
+			$lastimageid = ltrim($row["max_imageid"],"IMG");
+			$newimageid = $lastimageid++;
+			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);
+	   }
+	} else {
+		echo "0 results";
+	}
+	
+	$conn->close();
+	
+	return $newimageid;
 }
-if(isset($_GET['Download'])) {												# was Download passed to url?
-	download();																# run download function
+
+function getnewimageid(){
+	global $username, $password, $hostname, $database, $imgfolder;
+	
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	
+	$sql_lastimageid = "select max(id) as max_imageid from image";
+	
+	$lastimageid_result = $conn->query($sql_lastimageid);
+	
+	## Generate next IDs for insert
+	if ($lastimageid_result->num_rows > 0) {
+		// output data of each row
+		while($row = $lastimageid_result->fetch_assoc()) {
+			$lastimageid = ltrim($row["max_imageid"],"IMG");
+			$newimageid = $lastimageid++;
+			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);
+	   }
+	} else {
+		echo "0 results";
+	}
+	
+	$sql_createimage = "insert into image (id,image,createddatetime) values ('".$newimageid."','".$imgfolder.$newimageid.".bmp',Now())";
+	
+	$createimage_result = $conn->query($sql_createimage);
+	
+	if(!$createimage_result){
+		echo "<br/>INSERT PROBLEM<br/>";
+	}
+	
+	$conn->close();
+	
+	return $newimageid;
+}
+
+function getnewtempid(){
+	global $username, $password, $hostname, $database;
+	
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+
+	$sql_lasttempid = "select max(id) as max_tempid from temperature";
+	
+	$lasttempid_result = $conn->query($sql_lasttempid);
+	
+	## Generate next IDs for insert
+	if ($lasttempid_result->num_rows > 0) {
+		// output data of each row
+		while($row = $lasttempid_result->fetch_assoc()) {
+			$lasttempid = ltrim($row["max_tempid"],"TEMP");
+			$newtempid = $lasttempid++;
+			$newtempid = "TEMP".str_pad($lasttempid,5,"0",STR_PAD_LEFT);
+	   }
+	} else {
+		echo "0 results";
+	}
+
+	$conn->close();
+	
+	return $newtempid;
+}
+
+function getnewrelid(){
+	global $username, $password, $hostname, $database;
+	
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	
+	$sql_lastrelid = "select max(id) as max_relid from imagetemprel";
+	
+	$lastrelid_result = $conn->query($sql_lastrelid);
+	
+	## Generate next IDs for insert
+	if ($lastrelid_result->num_rows > 0) {
+		// output data of each row
+		while($row = $lastrelid_result->fetch_assoc()) {    	
+			$lastrelid = ltrim($row["max_relid"],"ITR");
+			$newrelid = $lastrelid++;
+			$newrelid = "ITR".str_pad($lastrelid,5,"0",STR_PAD_LEFT);
+		}
+	} else {
+		echo "0 results";
+	}
+
+	$conn->close();
+	
+	return $newrelid;
+}
+
+function inserttempdata($csvp){
+	global $username, $password, $hostname, $database;
+	
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	
+	if($handle = fopen($csvp,"r")){						# open csv 
+		if($csvdata = fgetcsv($handle,",")){							# get csv data
+			if($csvdata[count($csvdata)-1]==0){							# check for 0 at end of data array
+				array_pop($csvdata);									# drop element if 0
+			}
+		}	
+		Else {
+			exit("Failed to get contents of ".$csvp);
+		}
+	} 
+	Else {
+		exit("Failed to open ".$csvp);
+	}
+	
+	$tempid = getnewtempid();
+	$sql_inserttempdata = "insert into temperature (id,tempdata,createddatetime) values ('".$tempid."','".implode($csvdata)."',Now())";
+	
+	$inserttempdata_result = $conn->query($sql_inserttempdata);
+	
+	return $tempid;
+	
+}
+
+function insertrelation($imageid,$newtempid){
+	global $username, $password, $hostname, $database;
+	
+	echo "<br/> IMAGEID:".$imageid."<BR/>TEMPID:".$newtempid."<br/>";
+	
+	$conn = new mysqli($hostname, $username, $password, $database);
+	
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	
+	$sql_insertrelation = "insert into imagetemprel (id,imageid,tempid) values ('".getnewrelid()."','".$imageid."','".$newtempid."')";
+	
+	$insertrelation_result = $conn->query($sql_insertrelation);
+	
+	return $insertrelation_result;
 }
 
 function trigger() {
@@ -81,8 +257,12 @@ function download() {
 	$ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
 	$path = './phpseclib1.0.11/';						 					# path for phpseclib files
 
-	global $TESTMODE;
+	global $TESTMODE,$newrelid,$newimageid,$newtempid;
 	
+	echo "<br/>newrelid: ".getnewrelid()."<br/>";
+	echo "<br/>newimageid: ".getlastimageid()."<br/>";
+	echo "<br/>newtempid: ".getnewtempid()."<br/>";
+			
 	set_include_path(get_include_path() . PATH_SEPARATOR . $path); 			# modify include path
 	include "Net/SFTP.php"; 												# include sftp library
 
@@ -90,9 +270,11 @@ function download() {
 	$remotepath = 'TI/';												# remote path for local testing
 	
 	global $csva, $imagea;										# bring image and csv file name arrays to function
+	global $imgfolder;
 	
-	archive();													# run archive function
 	if (!$TESTMODE){
+	archive();													# run archive function
+	
 		for ($y=0;$y<count($ini_array['pis']['pi_name']);$y++) {            # loop through pis
 			
 			$name = $ini_array['pis']['pi_name'][$y];								# get name of pi
@@ -111,55 +293,40 @@ function download() {
 			}
 		
 			for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
-				if(!$sftp->get($remotepath.$imagea[$x],rtrim($name.'-'.$imagea[$x],".bmp").'-'.$date->format('Y-m-d-His').".bmp")){
-						Exit('Failed to download image: '.$remotepath.$imagea[$x]);
+				$imageid = getnewimageid();
+				if(!$sftp->get($remotepath.$imagea[$x],$imgfolder.$imageid.".bmp")){
+					Exit('Failed to download image: '.$remotepath.$imagea[$x]);
 				}
+				if(!$sftp->get($remotepath.$csva[$x],$csva[$x])){
+					Exit('Failed to download csv: '.$remotepath.$csva[$x]);
+					}
+				$newtempid = inserttempdata($csva[$x]);
+				insertrelation($imageid,$newtempid);
 			}
+		}
 			
-			for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){			# loop through cameras for csv
-				if(!$sftp->get($remotepath.$csva[$x],$name.'-'.$csva[$x])){
-						Exit('Failed to download csv: '.$remotepath.$csva[$x]);
-				}
-			}
+	}
 		
 			
-		}		
-	}
-	global $username, $password, $hostname, $database;
-	$conn = new mysqli($hostname, $username, $password,  $database);
-
-	if($conn->connect_error){
-		die("Connection to database failed! ".$conn->connect_error);
-	}
-}
-
-function insert(){
-	global $username, $password, $hostname, $database;
-	$conn = new mysqli($hostname, $username, $password,  $database);
-
-	if($conn->connect_error){
-		die("Connection to database failed! ".$conn->connect_error);
-	}
-	$sql = "insert into ";
-
-	$result = $conn->query($sql);
-
-	if ($result->num_rows > 0) {
-		// output data of each row
-		while($row = $result->fetch_assoc()) {
-			echo "image: ".$row["image"]." - Name: ".$row["tempdata"]."<br>";
-		}
-	} else {
-		echo "0 results";
-	}
-	$conn->close();
+}		
 	
+
+
+#############################################################################
+
+#BODY########################################################################
+if(isset($_GET['Trigger'])) {												# was Trigger passed to url?
+	trigger();																# run trigger function
+}
+if(isset($_GET['Download'])) {												# was Download passed to url?
+	download();																# run download function
 }
 
+## display past images
 $ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
 
 echo '<b>Most recent images:</b><br>';												
-$images = glob("*.bmp");											# lookup all .bmp files in archive folder
+$images = glob($imgfolder."*.bmp");											# lookup all .bmp files in archive folder
 #echo "<br/>".count($images)."<br/>";
 $z = 0;
 for($y=0;$y<count($ini_array['pis']['pi_name']);$y++){
@@ -193,62 +360,7 @@ for($y=0;$y<count($ini_array['pis']['pi_name']);$y++){
 		$z++;
 	}
 }
-
-$conn = new mysqli($hostname, $username, $password,  $database);
-
-if($conn->connect_error){
-	die("Connection to database failed! ".$conn->connect_error);
-}
-
-## Generate next IDs for insert
-$sql_lasttempid = "select max(id) as max_tempid from temperature";
-$sql_lastimageid = "select max(id) as max_imageid from image";
-$sql_lastrelid = "select max(id) as max_relid from imagetemprel";
-
-$lasttempid_result = $conn->query($sql_lasttempid);
-$lastimageid_result = $conn->query($sql_lastimageid);
-$lastrelid_result = $conn->query($sql_lastrelid);
-
-if ($lasttempid_result->num_rows > 0) {
-    // output data of each row
-    while($row = $lasttempid_result->fetch_assoc()) {
-		$lasttempid = ltrim($row["max_tempid"],"TEMP");
-		$newtempid = $lasttempid++;
-		$newtempid = "TEMP".str_pad($lasttempid,5,"0",STR_PAD_LEFT);
-		echo "<br/>newtempid: ".$newtempid."<br/>";
-    }
-} else {
-    echo "0 results";
-}
-
-if ($lastimageid_result->num_rows > 0) {
-    // output data of each row
-    while($row = $lastimageid_result->fetch_assoc()) {
-		$lastimageid = ltrim($row["max_imageid"],"IMG");
-		$newimageid = $lastimageid++;
-		$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);
-		echo "<br/>newimageid: ".$newimageid."<br/>";
-   }
-} else {
-    echo "0 results";
-}
-
-if ($lastrelid_result->num_rows > 0) {
-    // output data of each row
-	while($row = $lastrelid_result->fetch_assoc()) {    	
-		$lastrelid = ltrim($row["max_relid"],"ITR");
-		$newrelid = $lastrelid++;
-		$newrelid = "ITR".str_pad($lastrelid,5,"0",STR_PAD_LEFT);
-		echo "<br/>newrelid: ".$newrelid."<br/>";
-    }
-} else {
-    echo "0 results";
-}
-$conn->close();
-##
-
-
-
+#############################################################################
 ?>
 </body>
 </html>
