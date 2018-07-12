@@ -51,7 +51,7 @@ $imgfolder = "images/";
 ## display past images
 global $username, $password, $hostname, $database;
 ?>
-<b>Most recent images:</b><br>												
+<b>Image Archive:</b><br>												
 <?php
 $images = glob($imgfolder."*.bmp");											# lookup all .bmp files in archive folder
 $z = 0;

@@ -29,7 +29,7 @@
 }</style>
 </head>
 <body>
-<a href="ti.php">HOME</a> - <a href='archive.php'>Archive</a><br><br>
+<a href="ti.php">HOME</a> - <a href='archive.php'>ARCHIVE</a><br><br>
 <form action="ti.php" method="get">
 	<input type="submit" name="Capture" value="Capture">
 	<input type="submit" name="Download" value="Download">
@@ -249,6 +249,56 @@ function insertrelation($imageid,$newtempid){
 	return $insertrelation_result;
 }
 
+function showlatest(){
+	global $username, $password, $hostname, $database, $imgfolder;
+	
+	$conn = new mysqli($hostname, $username, $password,  $database);
+
+	if($conn->connect_error){
+		die("Connection to database failed! ".$conn->connect_error);
+	}
+	
+	$sql_lastimageid = "select max(id) as max_imageid, max(image) as image from image";
+	
+	$lastimageid_result = $conn->query($sql_lastimageid);
+	
+	## Generate next IDs for insert
+	if ($lastimageid_result->num_rows > 0) {
+		while($row = $lastimageid_result->fetch_assoc()) {
+			$image = ltrim($row["image"],"IMG");
+	   }
+	} else {
+		echo "0 results";
+	}
+
+	?>
+	Name: <?php echo $image; ?>	
+	<div class="container"><a href="<?php echo $image ?>"><img src="<?php echo $image ?>" ></a> 
+	<?php
+
+	$sql_gettempdata = "select tempdata from temperature t join imagetemprel i on i.tempid = t.id where i.imageid in (select id from image where image = '".$image."')";
+
+	$gettempdata_result = $conn->query($sql_gettempdata);
+
+	if ($gettempdata_result->num_rows > 0){
+		while($row = $gettempdata_result->fetch_assoc()){
+			$temp = explode(",", $row["tempdata"]);
+			array_pop($temp);
+	?>
+	<div class="bottomleft"><b>
+	<?php echo min($temp); ?>
+	</div><div class="bottomright">
+	<?php echo max($temp); ?></b>
+	</div><br/>
+	<?php
+		}
+	} Else {
+		echo "<br/><B>TEMPERATURE DATA NOT FOUND</B><br/>";
+	}
+
+	$conn->close();
+}
+
 function capture() {
 	global $TESTMODE;
 	if (!$TESTMODE){
@@ -297,11 +347,13 @@ function download() {
 	$path = './phpseclib1.0.11/';						 					# path for phpseclib files
 
 	global $TESTMODE,$newrelid,$newimageid,$newtempid;
-	echo "<hr/>";
-	echo "<br/>newrelid: ".getnewrelid()."<br/>";
-	echo "<br/>newimageid: ".getlastimageid()."<br/>";
-	echo "<br/>newtempid: ".getnewtempid()."<br/>";
-	echo "<hr/>";
+	if($TESTMODE){
+		echo "<hr/>";
+		echo "<br/>newrelid: ".getnewrelid()."<br/>";
+		echo "<br/>newimageid: ".getlastimageid()."<br/>";
+		echo "<br/>newtempid: ".getnewtempid()."<br/>";
+		echo "<hr/>";
+	}
 	set_include_path(get_include_path() . PATH_SEPARATOR . $path); 			# modify include path
 	include "Net/SFTP.php"; 												# include sftp library
 
@@ -312,8 +364,8 @@ function download() {
 	global $imgfolder;
 	
 	if (!$TESTMODE){
-	archive();													# run archive function
-	
+		archive();													# run archive function
+		
 		for ($y=0;$y<count($ini_array['pis']['pi_name']);$y++) {            # loop through pis
 			
 			$name = $ini_array['pis']['pi_name'][$y];								# get name of pi
@@ -343,12 +395,9 @@ function download() {
 				insertrelation($imageid,$newtempid);
 			}
 		}
-			
 	}
-		
-			
+		showlatest();	
 }		
-
 #############################################################################
 
 #BODY########################################################################
