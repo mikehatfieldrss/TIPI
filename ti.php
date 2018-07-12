@@ -17,6 +17,8 @@ date_default_timezone_set('PST8PDT');										# Set Pacific Timezone
 $csva = array('Device_1.csv','Device_2.csv');								# CSV filenames
 $imagea = array('Device_1.bmp','Device_2.bmp');								# BMP filenames
 
+$TESTMODE = true;
+
 if(isset($_GET['Trigger'])) {												# was Trigger passed to url?
 	trigger();																# run trigger function
 }
@@ -25,10 +27,13 @@ if(isset($_GET['Download'])) {												# was Download passed to url?
 }
 
 function trigger() {
+	global $TESTMODE;
+	if (!$TESTMODE){
 	$ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
 	$path = './phpseclib1.0.11/';						 					# path for phpseclib files
 	set_include_path(get_include_path() . PATH_SEPARATOR . $path); 			# modify include path
 	include "Net/SSH2.php"; 												# include ssh library
+	
 	
 	for ($x=0;$x<count($ini_array['pis']['pi_name']);$x++) {
 		$username = $ini_array['pis']['pi_login'][$x]; 						# get username from ini file array
@@ -51,9 +56,10 @@ function trigger() {
 			exit('Failed to capture camera 2');
 		} 				
 	}
+	}
 }
 
-function archive(){
+function archive() {
 	$archivefolder = 'old/';											# set archive folder variable
 	
 	$images = glob("*.bmp");											# lookup all .bmp files in archive folder
@@ -67,6 +73,8 @@ function download() {
 	$ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
 	$path = './phpseclib1.0.11/';						 					# path for phpseclib files
 
+	global $TESTMODE;
+	
 	set_include_path(get_include_path() . PATH_SEPARATOR . $path); 			# modify include path
 	include "Net/SFTP.php"; 												# include sftp library
 
@@ -76,38 +84,39 @@ function download() {
 	global $csva, $imagea;										# bring image and csv file name arrays to function
 	
 	archive();													# run archive function
-	
-	for ($y=0;$y<count($ini_array['pis']['pi_name']);$y++) {            # loop through pis
-		
-		$name = $ini_array['pis']['pi_name'][$y];								# get name of pi
-		$username = $ini_array['pis']['pi_login'][$y]; 							# get username from ini file array
-		$password = $ini_array['pis']['pi_pw'][$y]; 								# get password from ini file array
-		$host = $ini_array['pis']['pi_ip'][$y]; 							# get hostname (ip address) from ini file array
+	if (!$TESTMODE){
+		for ($y=0;$y<count($ini_array['pis']['pi_name']);$y++) {            # loop through pis
+			
+			$name = $ini_array['pis']['pi_name'][$y];								# get name of pi
+			$username = $ini_array['pis']['pi_login'][$y]; 							# get username from ini file array
+			$password = $ini_array['pis']['pi_pw'][$y]; 								# get password from ini file array
+			$host = $ini_array['pis']['pi_ip'][$y]; 							# get hostname (ip address) from ini file array
 
-		$date = new Datetime();							# date variable for file name 
+			$date = new Datetime();							# date variable for file name 
 
-		echo "<b>Downloading from: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
-	
-		$sftp = new Net_SFTP($host); 											# create sftp object for host
+			echo "<b>Downloading from: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
 		
-		if (!$sftp->login($username, $password)) { 									# create sftp connection object for host
-			exit('Login Failed'); 											# leave if the login fails
-		}
-	
-		for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
-			if(!$sftp->get($remotepath.$imagea[$x],rtrim($name.'-'.$imagea[$x],".bmp").'-'.$date->format('Y-m-d-His').".bmp")){
-					Exit('Failed to download image: '.$remotepath.$imagea[$x]);
+			$sftp = new Net_SFTP($host); 											# create sftp object for host
+			
+			if (!$sftp->login($username, $password)) { 									# create sftp connection object for host
+				exit('Login Failed'); 											# leave if the login fails
 			}
-		}
 		
-		for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){			# loop through cameras for csv
-			if(!$sftp->get($remotepath.$csva[$x],$name.'-'.$csva[$x])){
-					Exit('Failed to download csv: '.$remotepath.$csva[$x]);
+			for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
+				if(!$sftp->get($remotepath.$imagea[$x],rtrim($name.'-'.$imagea[$x],".bmp").'-'.$date->format('Y-m-d-His').".bmp")){
+						Exit('Failed to download image: '.$remotepath.$imagea[$x]);
+				}
 			}
-		}
-	
+			
+			for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){			# loop through cameras for csv
+				if(!$sftp->get($remotepath.$csva[$x],$name.'-'.$csva[$x])){
+						Exit('Failed to download csv: '.$remotepath.$csva[$x]);
+				}
+			}
 		
-	}		
+			
+		}		
+	}
 }
 
 $ini_array = parse_ini_file("picam.ini",true); 							# array to store the ini file contents
