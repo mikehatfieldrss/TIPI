@@ -1,57 +1,4 @@
-<html>
-<head>
-<style>body { 
-    background-color: lightblue;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 75%;
-	<!--padding: 40px 19px; -->
-}
-	.container {
-		position: absolute;
-	}
-	.bottomleft {
-	color: white;
-    position: relative;
-    bottom: 24px;
-    left: 1px;
-    font-size: 18px;
-}
-	.bottomright {
-    position: relative;
-    bottom: 44px;
-    left: 300px;
-    font-size: 18px;
-}
-	img { 
-    width: 320px;
-    height: 320px;
-}		
-}</style>
-</head>
-<body>
-<a href="ti.php">HOME</a> - <a href='archive.php'>ARCHIVE</a><br><br>
-<form action="ti.php" method="get">
-	<input type="submit" name="Capture" value="Capture">
-	<input type="submit" name="Download" value="Download">
-	<input type="submit" name="Search" value="Search">
-</form>
 <?php
-#GLOBALS#####################################################################
-date_default_timezone_set('PST8PDT');										# Set Pacific Timezone
-
-$csva = array('Device_1.csv','Device_2.csv');								# CSV filenames
-$imagea = array('Device_1.bmp','Device_2.bmp');								# BMP filenames
-
-$TESTMODE = false;
-
-$hostname = "127.0.0.1";
-$username = "webuser";
-$password = "webuser123";
-$database = "tipi";
-
-$imgfolder = "images/";
-#############################################################################
-
 #FUNCTIONS###################################################################
 function getlastimageid(){
 	global $username, $password, $hostname, $database, $imgfolder;
@@ -273,8 +220,7 @@ function showlatest(){
 	$sql_lastimageid = "select max(id) as max_imageid, max(image) as image from image";
 	
 	$lastimageid_result = $conn->query($sql_lastimageid);
-	
-	## Generate next IDs for insert
+
 	if ($lastimageid_result->num_rows > 0) {
 		while($row = $lastimageid_result->fetch_assoc()) {
 			$image = ltrim($row["image"],"IMG");
@@ -398,17 +344,5 @@ function download() {
 		}
 		showlatest();	
 	}
-}		
-#############################################################################
-
-#BODY########################################################################
-if(isset($_GET['Capture'])) {												# was Trigger passed to url?
-	capture();																# run trigger function
 }
-if(isset($_GET['Download'])) {												# was Download passed to url?
-	download();																# run download function
-}
-#############################################################################
 ?>
-</body>
-</html>
