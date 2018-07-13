@@ -112,7 +112,7 @@ function getnewimageid(){
 	$createimage_result = $conn->query($sql_createimage);
 	
 	if(!$createimage_result){
-		echo "<br/>INSERT PROBLEM<br/>";
+		echo "<br/><b>Failed to insert</b><br/>";
 	}
 	
 	$conn->close();
@@ -332,16 +332,6 @@ function capture() {
 	}
 }
 
-function archive() {
-	$archivefolder = 'old/';											# set archive folder variable
-	
-	$images = glob("*.bmp");											# lookup all .bmp files in archive folder
-
-	foreach($images as $image) {		# loop through all .bmp files in archive folder
-		rename($image,$archivefolder.$image); # move the last received images to the archive subfolder 
-	}
-}
-
 function download() {
 	$ini_array = parse_ini_file("tipi.ini",true); 							# array to store the ini file contents
 	$path = './phpseclib1.0.11/';						 					# path for phpseclib files
@@ -364,8 +354,6 @@ function download() {
 	global $imgfolder;
 	
 	if (!$TESTMODE){
-		archive();													# run archive function
-		
 		for ($y=0;$y<count($ini_array['pis']['pi_name']);$y++) {            # loop through pis
 			
 			$name = $ini_array['pis']['pi_name'][$y];								# get name of pi
