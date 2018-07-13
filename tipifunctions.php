@@ -9,16 +9,15 @@ function getlastimageid(){
 		die("Connection to database failed! ".$conn->connect_error);
 	}
 	
-	$sql_lastimageid = "select max(id) as max_imageid from image";
+	$sql_lastimageid = "select max(id) as max_imageid from image";      # get highest id value of image records
 	
 	$lastimageid_result = $conn->query($sql_lastimageid);
 	
-	## Generate next IDs for insert
 	if ($lastimageid_result->num_rows > 0) {
 		while($row = $lastimageid_result->fetch_assoc()) {
-			$lastimageid = ltrim($row["max_imageid"],"IMG");
-			$newimageid = $lastimageid++;
-			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);
+			$lastimageid = ltrim($row["max_imageid"],"IMG");        # get numeric part of image id
+			$newimageid = $lastimageid++;                           # increment the id number
+			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);   # append the prefix to the new image id number
 	   }
 	} else {
 		echo "0 results";
@@ -38,17 +37,15 @@ function getnewimageid(){
 		die("Connection to database failed! ".$conn->connect_error);
 	}
 	
-	$sql_lastimageid = "select max(id) as max_imageid from image";
+	$sql_lastimageid = "select max(id) as max_imageid from image";  # get highest id value of image records
 	
 	$lastimageid_result = $conn->query($sql_lastimageid);
 	
-	## Generate next IDs for insert
 	if ($lastimageid_result->num_rows > 0) {
-		// output data of each row
 		while($row = $lastimageid_result->fetch_assoc()) {
-			$lastimageid = ltrim($row["max_imageid"],"IMG");
-			$newimageid = $lastimageid++;
-			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);
+			$lastimageid = ltrim($row["max_imageid"],"IMG");            # get numeric part of image id
+			$newimageid = $lastimageid++;                               # increment the id number
+			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);   #append the prefix to the new image number
 	   }
 	} else {
 		echo "0 results";
@@ -68,17 +65,15 @@ function getnewtempid(){
 		die("Connection to database failed! ".$conn->connect_error);
 	}
 
-	$sql_lasttempid = "select max(id) as max_tempid from temperature";
+	$sql_lasttempid = "select max(id) as max_tempid from temperature";  # get highest id value of temperature records
 	
 	$lasttempid_result = $conn->query($sql_lasttempid);
 	
-	## Generate next IDs for insert
 	if ($lasttempid_result->num_rows > 0) {
-		// output data of each row
 		while($row = $lasttempid_result->fetch_assoc()) {
-			$lasttempid = ltrim($row["max_tempid"],"TEMP");
-			$newtempid = $lasttempid++;
-			$newtempid = "TEMP".str_pad($lasttempid,5,"0",STR_PAD_LEFT);
+			$lasttempid = ltrim($row["max_tempid"],"TEMP");             # get numeric part of id temperature records
+			$newtempid = $lasttempid++;                                 # increment the id number
+			$newtempid = "TEMP".str_pad($lasttempid,5,"0",STR_PAD_LEFT);    # 
 	   }
 	} else {
 		echo "0 results";
@@ -243,11 +238,8 @@ function showlatest(){
 			$temp = explode(",", $row["tempdata"]);
 			array_pop($temp);
 	?>
-	<div class="bottomleft"><b>
-	<?php echo min($temp); ?>
-	</div><div class="bottomright">
-	<?php echo max($temp); ?></b>
-	</div><br/>
+	<div class="bottomleft"><b><?php echo min($temp); ?></div>
+    <div class="bottomright"><?php echo max($temp); ?></b></div><br/>
 	<?php
 		}
 	} Else {
@@ -345,4 +337,28 @@ function download() {
 		showlatest();	
 	}
 }
+
+function searchbydate($date){
+    global $username, $password, $hostname, $database, $imgfolder;
+	
+    $conn = new mysqli($hostname, $username, $password,  $database);
+
+    if($conn->connect_error){
+        die("Connection to database failed! ".$conn->connect_error);
+    }
+
+    $sql_searchbydate = "select id, image from image where date like ".$date;
+
+    $searchbydate_result = $conn->query($sql_searchbydate);
+    
+    echo $date;
+    if($searchbydate_result->num_rows > 0){
+        while($rows = $searchbydate_result->fetch_assoc()){
+          $image = $row['image'];
+          echo $image;
+          echo "<img src=".$image."><br/>";
+        }
+    }
+}
+
 ?>
