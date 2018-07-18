@@ -1,32 +1,6 @@
 <html>
 <head>
-<style>body { 
-    background-color: lightblue;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 75%;
-	<!--padding: 40px 19px; -->
-}
-	.container {
-		position: absolute;
-	}
-	.bottomleft {
-	color: white;
-    position: relative;
-    bottom: 24px;
-    left: 1px;
-    font-size: 18px;
-}
-	.bottomright {
-    position: relative;
-    bottom: 44px;
-    left: 300px;
-    font-size: 18px;
-}
-	img { 
-    width: 320px;
-    height: 320px;
-}		
-}</style>
+<link href="ti.css" rel="stylesheet" type="text/css" media="all">
 </head>
 <body>
 <a href="ti.php">HOME</a><br><br>
@@ -45,13 +19,12 @@ $password = "webuser123";
 $database = "tipi";
 
 $imgfolder = "images/";
-#############################################################################
 
 #BODY########################################################################
 ## display past images
 global $username, $password, $hostname, $database;
 ?>
-<b>Image Archive:</b><br>												
+<div class="title">Image Archive:<br></div>
 <?php
 $images = glob($imgfolder."*.bmp");											# lookup all .bmp files in archive folder
 $z = 0;
@@ -90,7 +63,7 @@ Name: <?php echo $image; ?>
 
 	$z++;
 }
-#############################################################################
+
 ?>
 </body>
 </html>

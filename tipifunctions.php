@@ -347,7 +347,7 @@ function searchbydate($date){
         die("Connection to database failed! ".$conn->connect_error);
     }
 
-    $sql_searchbydate = "select id, image from image where date like ".$date;
+    $sql_searchbydate = "select id, image from image where date like ".$date."%";
 
     $searchbydate_result = $conn->query($sql_searchbydate);
     
