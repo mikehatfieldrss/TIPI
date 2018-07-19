@@ -303,40 +303,44 @@ function download() {
 	global $csva, $imagea;										# bring image and csv file name arrays to function
 	global $imgfolder;
 	
-	if (!$TESTMODE){
-		for ($y=0;$y<count($ini_array['pis']['pi_name']);$y++) {            # loop through pis
-			
-			$name = $ini_array['pis']['pi_name'][$y];								# get name of pi
-			$username = $ini_array['pis']['pi_login'][$y]; 							# get username from ini file array
-			$password = $ini_array['pis']['pi_pw'][$y]; 								# get password from ini file array
-			$host = $ini_array['pis']['pi_ip'][$y]; 							# get hostname (ip address) from ini file array
-
-			$date = new Datetime();							# date variable for file name 
-
-			$sftp = new Net_SFTP($host); 											# create sftp object for host
-			
-			if (!$sftp->login($username, $password)) { 									# create sftp connection object for host
-				exit('Login Failed'); 											# leave if the login fails
-			}
+	for ($y=0;$y<count($ini_array['pis']['pi_name']);$y++) {            # loop through pis
 		
-			for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
-				$imageid = getnewimageid();
-				if(!$sftp->get($remotepath.$imagea[$x],$imgfolder.$imageid.".bmp")){
-					Exit('Failed to download image: '.$remotepath.$imagea[$x]);
-				}
-				insertnewimage($imageid);
-				if(!$sftp->get($remotepath.$csva[$x],$csva[$x])){
-					Exit('Failed to download csv: '.$remotepath.$csva[$x]);
-				}
-				$newtempid = inserttempdata($csva[$x]);
-				insertrelation($imageid,$newtempid);
-			}
-			echo "<b>Image Acquired: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
+		$name = $ini_array['pis']['pi_name'][$y];								# get name of pi
+		$username = $ini_array['pis']['pi_login'][$y]; 							# get username from ini file array
+		$password = $ini_array['pis']['pi_pw'][$y]; 								# get password from ini file array
+		$host = $ini_array['pis']['pi_ip'][$y]; 							# get hostname (ip address) from ini file array
+
+		$date = new Datetime();							# date variable for file name 
+
+		$sftp = new Net_SFTP($host); 											# create sftp object for host
+			
+		if (!$sftp->login($username, $password)) { 									# create sftp connection object for host
+			exit('Login Failed'); 											# leave if the login fails
 		}
-		showlatest();	
+		
+		for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
+
+			$imageid = getnewimageid();									# generate new imageid
+
+			if(!$sftp->get($remotepath.$imagea[$x],$imgfolder.$imageid.".bmp")){ # download bmp
+				Exit('Failed to download image: '.$remotepath.$imagea[$x]);  
+			}
+
+			insertnewimage($imageid);  									# insert downloaded image to db
+
+			if(!$sftp->get($remotepath.$csva[$x],$csva[$x])){			# download csv
+				Exit('Failed to download csv: '.$remotepath.$csva[$x]); 
+			}
+
+			$newtempid = inserttempdata($csva[$x]); 				# insert csv data to db
+			insertrelation($imageid,$newtempid);					# create db record
+		}
+		echo "<b>Image Acquired: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
 	}
+	showlatest();	
 }
 
+# search function - does not work yet
 function searchbydate($date){
     global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 	
