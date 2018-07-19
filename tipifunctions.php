@@ -317,7 +317,7 @@ function download() {
 			exit('Login Failed'); 											# leave if the login fails
 		}
 		
-echo sftp_pwd($sftp);
+echo $sftp->pwd();
 
 		for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
 
