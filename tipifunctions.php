@@ -317,10 +317,7 @@ function download() {
 			exit('Login Failed'); 											# leave if the login fails
 		}
 		
-echo $sftp->pwd()."<br/>";
-if(!$sftp->get('TI/Device_1.bmp','Device_1.bmp')){
-	echo "<br/>cant download<br/>";
-}
+		#$sftp->pwd();
 
 		for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
 
