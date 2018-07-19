@@ -256,8 +256,7 @@ function capture() {
 		$path = './phpseclib1.0.11/';						 					# path for phpseclib files
 		set_include_path(get_include_path() . PATH_SEPARATOR . $path); 			# modify include path
 		include "Net/SSH2.php"; 												# include ssh library
-		
-		
+			
 		for ($x=0;$x<count($ini_array['pis']['pi_name']);$x++) {
 			$username = $ini_array['pis']['pi_login'][$x]; 						# get username from ini file array
 			$password = $ini_array['pis']['pi_pw'][$x]; 						# get password from ini file array
@@ -318,6 +317,8 @@ function download() {
 			exit('Login Failed'); 											# leave if the login fails
 		}
 		
+echo ftp_pwd($sftp);
+
 		for($x=0;$x<$ini_array['pis']['pi_camcount'][$y];$x++){           # loop through cameras for image
 
 			$imageid = getnewimageid();									# generate new imageid
