@@ -313,8 +313,6 @@ function download() {
 
 			$date = new Datetime();							# date variable for file name 
 
-			echo "<b>Image Acquired: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
-		
 			$sftp = new Net_SFTP($host); 											# create sftp object for host
 			
 			if (!$sftp->login($username, $password)) { 									# create sftp connection object for host
@@ -333,6 +331,7 @@ function download() {
 				$newtempid = inserttempdata($csva[$x]);
 				insertrelation($imageid,$newtempid);
 			}
+			echo "<b>Image Acquired: </b>".$name." on ".$date->format('m-d-Y')." at ".$date->format('h:i:s')."<br>"; # output current pi name to page
 		}
 		showlatest();	
 	}
