@@ -7,7 +7,7 @@
 <form action="ti.php" method="get">
 	<input type="submit" name="Capture" value="Capture">
 	<input type="submit" name="Download" value="Download">
-	<input type="submit" name="Search" value="Search">
+	<!--<input type="submit" name="Search" value="Search">-->
 </form>
 <?php
 #INCLUDE#####################################################################
@@ -22,9 +22,10 @@ $imagea = array('Device_1.bmp','Device_2.bmp');								# BMP filenames
 
 $TESTMODE = false;
 
-$hostname = "127.0.0.1";
-$username = "webuser";
-$password = "webuser123";
+#mysql info
+$dbhostname = "127.0.0.1";
+$dbusername = "webuser";
+$dbpassword = "webuser123";
 $database = "tipi";
 
 $imgfolder = "images/";

@@ -1,9 +1,9 @@
 <?php
 #FUNCTIONS###################################################################
 function getlastimageid(){
-	global $username, $password, $hostname, $database, $imgfolder;
+	global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -29,9 +29,9 @@ function getlastimageid(){
 }
 
 function getnewimageid(){
-	global $username, $password, $hostname, $database, $imgfolder;
+	global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -57,9 +57,9 @@ function getnewimageid(){
 }
 
 function getnewtempid(){
-	global $username, $password, $hostname, $database;
+	global $dbusername, $dbpassword, $dbhostname, $database;
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -85,9 +85,9 @@ function getnewtempid(){
 }
 
 function getnewrelid(){
-	global $username, $password, $hostname, $database;
+	global $dbusername, $dbpassword, $dbhostname, $database;
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -115,9 +115,9 @@ function getnewrelid(){
 }
 
 function gettempdatafromfile($imagefile){
-	global $username, $password, $hostname, $database;	
+	global $dbusername, $dbpassword, $dbhostname, $database;	
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 	
 	echo "<br/>imagefile: ".$imagefile."<br/>";
 	
@@ -139,9 +139,9 @@ function gettempdatafromfile($imagefile){
 }
 
 function inserttempdata($csvp){
-	global $username, $password, $hostname, $database;
+	global $dbusername, $dbpassword, $dbhostname, $database;
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -168,9 +168,9 @@ function inserttempdata($csvp){
 }
 
 function insertnewimage($newimageid){
-	global $username, $password, $hostname, $database, $imgfolder;
+	global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -188,9 +188,9 @@ function insertnewimage($newimageid){
 }
 
 function insertrelation($imageid,$newtempid){
-	global $username, $password, $hostname, $database;
+	global $dbusername, $dbpassword, $dbhostname, $database;
 
-	$conn = new mysqli($hostname, $username, $password, $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword, $database);
 	
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -204,9 +204,9 @@ function insertrelation($imageid,$newtempid){
 }
 
 function showlatest(){
-	global $username, $password, $hostname, $database, $imgfolder;
+	global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 	
-	$conn = new mysqli($hostname, $username, $password,  $database);
+	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
 	if($conn->connect_error){
 		die("Connection to database failed! ".$conn->connect_error);
@@ -339,9 +339,9 @@ function download() {
 }
 
 function searchbydate($date){
-    global $username, $password, $hostname, $database, $imgfolder;
+    global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 	
-    $conn = new mysqli($hostname, $username, $password,  $database);
+    $conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
 
     if($conn->connect_error){
         die("Connection to database failed! ".$conn->connect_error);
