@@ -1,4 +1,10 @@
-body { 
+:root {
+  --image-width: 320px;
+  --image-height: 320px;
+  --archive-image-width: calc(var(--image-width) / 2);
+  --archive-image-height: calc(var(--image-height) / 2);
+}
+body {
     background-color: lightblue;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 75%;
@@ -6,23 +12,64 @@ body {
 	.container {
 		position: absolute;
 }
-	.bottomleft {
-	color: white;
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 4px;
+  }
+
+  .column {
+    flex: 10%;
+    max-width: 10%;
+    padding: 0 4px;
+  }
+
+  .column img {
+    vertical-align: middle;
+    width: var(--archive-image-width);
+    height: var(--archive-image-height);
+  }
+
+  .bottomleft {
+    color: white;
     position: relative;
     bottom: 24px;
     left: 1px;
     font-size: 18px;
 }
+
 	.bottomright {
     position: relative;
     bottom: 44px;
-    left: 300px;
+    left: calc(var(--image-width) - 46px);
     font-size: 18px;
 }
-	img { 
-    width: 320px;
-    height: 320px;
+
+.archivebottomleft {
+  color: white;
+  position: relative;
+  bottom: 24px;
+  left: 1px;
+  font-size: 18px;
 }
+
+.archivebottomright {
+  position: relative;
+  bottom: 44px;
+  left: calc(var(--archive-image-width) - 46px);
+  font-size: 18px;
+}
+
+	.newimg {
+    width: var(--image-width);
+    height: var(--image-height);
+}
+
+  .oldimg {
+    width: var(--archive-image-width);
+    height: var(--archive-image-height);
+  }
+
     .title {
         font-weight: bold;
     }
