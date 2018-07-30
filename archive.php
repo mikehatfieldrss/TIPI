@@ -35,11 +35,11 @@ if($conn->connect_error){
 $sql_imagelist = "select image,createddatetime from image where id in (select imageid from imagetemprel) order by createddatetime desc, image desc";  	# get image filenames that have temperature data
 
 $imagelist_result = $conn->query($sql_imagelist);
-echo "<div class='row'>";
+echo "<div class='flex-container'>";
 $w = 0;
 if ($imagelist_result->num_rows > 0){
 	while($row = $imagelist_result->fetch_assoc()){
-		echo "<div class='column'>";
+		echo "<div>";
 		$w++;
 		$datetime = $row["createddatetime"];
 		$image = $row["image"];
@@ -72,10 +72,10 @@ Else {
 	}
 echo "</div>";
 	#$conn->close();
-	if($w==6){
-		echo "</div><div class='row'>";
-		$w=0;
-	}
+	#if($w==6){
+	#	echo "</div><div class='row'>";
+	#	$w=0;
+	#}
 		}
 	}
 
