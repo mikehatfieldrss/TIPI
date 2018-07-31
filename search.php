@@ -8,44 +8,41 @@ include 'tipifunctions.php';
 #VARIABLES######################################################################
 date_default_timezone_set('PST8PDT');																						# Set Pacific Timezone
 
-$dbhostname = "192.168.70.33";
-$dbusername = "webuser";
-$dbpassword = "webuser123";
-$database = "tipi";
+$dbhostname = "192.168.70.33";                                                  # mysql server address
+$dbusername = "webuser";                                                        # mysql username
+$dbpassword = "webuser123";                                                     # mysql password
+$database = "tipi";                                                             # mysql database
 
-$imgfolder = "images/";
-$datepicked = "";
+$imgfolder = "images/";                                                         # folder for images
+$datepicked = "";                                                               # "declare" datepicked variable
 ?>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>jQuery UI Datepicker - Default functionality</title>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<!-- <link rel="stylesheet" href="/resources/demos/style.css"> -->
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>                <!-- load jquery -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>          <!-- load jquery ui-->
 <script>
 $( function() {
-  $( "#datepicker" ).datepicker({
-          dateFormat:"yy-mm-dd"
+  $( "#datepicker" ).datepicker({                                               // build jquery datepicker
+          dateFormat:"yy-mm-dd"                                                 // format date as YYYY-MM-DD
   });
 });
 </script>
-<a href="ti.php">HOME</a> - <a href='archive.php'>ARCHIVE</a> - <a href='search.php'>SEARCH</a><br><br>
+<a href="ti.php">HOME</a> - <a href='archive.php'>ARCHIVE</a> - <a href='search.php'>SEARCH</a><br><br>  <!-- navigation bar -->
 </head>
 <body>
-  <form name="form1" action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">
-    <p>Date: <input type="text" name="txtDate" id="datepicker"></p>
-    <input type="submit" name="submit" value="Search">
+  <form name="form1" action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST">  <!-- build for for handling post -->
+    <p>Date: <input type="text" name="txtDate" id="datepicker" size="6"></p>      <!-- build datepicker -->
+    <input type="submit" name="submit" value="Search">                            <!-- submit button -->
   </form>
 <?php
-  if(isset($_POST["submit"]))
+  if(isset($_POST["submit"]))                                                    # // <!-- was submit part of the post? -->
   {
-    if($_POST["txtDate"]){
-    $datepicked= $_POST["txtDate"];
-    #echo "<br>After pick Date: $datepicked<br/>";
+    if($_POST["txtDate"]){                                                       # was the date picker variable passed? might be inital load
+    $datepicked= $_POST["txtDate"];                                             # set datepicked var
     }
     else {
-      echo "<br/>Pick a date<br/>";
+      echo "<br/>Pick a date<br/>";                                             # echo instructions to page
       exit;
     }
   }
