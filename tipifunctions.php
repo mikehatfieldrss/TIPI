@@ -1,6 +1,6 @@
 <?php
 #FUNCTIONS###################################################################
-function getlastimageid(){
+function getlastimageid(){																											# function to read the highest value image id in image table
 	global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 
 	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
@@ -28,7 +28,7 @@ function getlastimageid(){
 	return $newimageid;
 }
 
-function getnewimageid(){
+function getnewimageid(){																												# function to read the highest value image id in image table and generate a new one
 	global $dbusername, $dbpassword, $dbhostname, $database, $imgfolder;
 
 	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
@@ -45,7 +45,7 @@ function getnewimageid(){
 		while($row = $lastimageid_result->fetch_assoc()) {
 			$lastimageid = ltrim($row["max_imageid"],"IMG");            							# get numeric part of image id
 			$newimageid = $lastimageid++;                               							# increment the id number
-			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);   					# append the prefix to the new image number
+			$newimageid = "IMG".str_pad($lastimageid,5,"0",STR_PAD_LEFT);   					# prepend the prefix to the new image number
 	   }
 	} else {
 		echo "0 results";
@@ -56,7 +56,7 @@ function getnewimageid(){
 	return $newimageid;
 }
 
-function getnewtempid(){
+function getnewtempid(){																												# function to read the highest value temperature data id from the termperature table and generate a new one
 	global $dbusername, $dbpassword, $dbhostname, $database;
 
 	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
@@ -73,7 +73,7 @@ function getnewtempid(){
 		while($row = $lasttempid_result->fetch_assoc()) {
 			$lasttempid = ltrim($row["max_tempid"],"TEMP");             							# get numeric part of id temperature records
 			$newtempid = $lasttempid++;                                 							# increment the id number
-			$newtempid = "TEMP".str_pad($lasttempid,5,"0",STR_PAD_LEFT);    					#
+			$newtempid = "TEMP".str_pad($lasttempid,5,"0",STR_PAD_LEFT);    					# prepend the prefix to the new temperature id number
 	   }
 	} else {
 		echo "0 results";
@@ -84,7 +84,7 @@ function getnewtempid(){
 	return $newtempid;
 }
 
-function getnewrelid(){
+function getnewrelid(){																													# function to read the highest value relation id from the temp
 	global $dbusername, $dbpassword, $dbhostname, $database;
 
 	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
@@ -101,7 +101,7 @@ function getnewrelid(){
 		while($row = $lastrelid_result->fetch_assoc()) {
 			$lastrelid = ltrim($row["max_relid"],"ITR");															# get numberic part of imagetemprel record id
 			$newrelid = $lastrelid++;																									# increment the id number
-			$newrelid = "ITR".str_pad($lastrelid,5,"0",STR_PAD_LEFT);									# reconstruct id with new value
+			$newrelid = "ITR".str_pad($lastrelid,5,"0",STR_PAD_LEFT);									# prepend the prefix to the new relation id number
 		}
 	} else {
 		echo "0 results";
@@ -110,30 +110,6 @@ function getnewrelid(){
 	$conn->close();
 
 	return $newrelid;
-}
-
-function gettempdatafromfile($imagefile){																				# reads temperature data from files - This function should not be needed, we're using the database to store all data
-	global $dbusername, $dbpassword, $dbhostname, $database;
-
-	$conn = new mysqli($dbhostname, $dbusername, $dbpassword,  $database);
-
-	echo "<br/>imagefile: ".$imagefile."<br/>";
-
-	if($conn->connect_error){
-		die("Connection to database failed! ".$conn->connect_error);
-	}
-
-	if($handle = fopen($imagefile,"r")){																					# open csv
-		if($filedata = file_get_contents($imagefile)){
-			echo "<br/>TEMPDATA: ".$filedata;
-		}
-		Else {
-			exit("Failed to get contents of ".$imagefile);
-		}
-	}
-	Else {
-		exit("Failed to open ".$imagefile);
-	}
 }
 
 function inserttempdata($csvp){																									# parameter is the array with the csv filenames
@@ -146,12 +122,12 @@ function inserttempdata($csvp){																									# parameter is the array
 	}
 
 	if($handle = fopen($csvp,"r")){																								# open csv
-		if($tempdata = file_get_contents($csvp)){
-			$tempid = getnewtempid();
+		if($tempdata = file_get_contents($csvp)){																		# read data from csv for loop
+			$tempid = getnewtempid();																									# generate a new id for the temperature data if the file opens
 
-			$sql_inserttempdata = "insert into temperature (id,tempdata,createddatetime) values ('".$tempid."','".$tempdata."',Now())";
+			$sql_inserttempdata = "insert into temperature (id,tempdata,createddatetime) values ('".$tempid."','".$tempdata."',Now())"; # sql to write the temperature data to the database
 
-			$inserttempdata_result = $conn->query($sql_inserttempdata);
+			$inserttempdata_result = $conn->query($sql_inserttempdata);								# write temperature data to database
 		}
 		Else {
 			exit("Failed to get contents of ".$csvp);
@@ -282,7 +258,7 @@ function capture() {
 				exit('Failed to capture camera 2');
 			}
 		}
-download();
+		download();
 
 }
 
