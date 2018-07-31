@@ -1,13 +1,12 @@
 <html>
 <head>
 <link href="ti.css" rel="stylesheet" type="text/css" media="all">
+<a href="ti.php">HOME</a> - <a href='archive.php'>ARCHIVE</a> - <a href='search.php'>SEARCH</a><br><br>
 </head>
 <body>
-<a href="ti.php">HOME</a> - <a href='archive.php'>ARCHIVE</a><br><br>
 <form action="ti.php" method="get">
 	<input type="submit" name="Capture" value="Capture">
 	<input type="submit" name="Download" value="Download">
-	<!--<input type="submit" name="Search" value="Search">-->
 </form>
 <?php
 #INCLUDE########################################################################
